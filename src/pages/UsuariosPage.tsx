@@ -14,7 +14,6 @@ import {
 import toast from "react-hot-toast";
 import api from "../services/api";
 import UserMetrics from "../components/usuarios/UserMetrics";
-import UserTable from "../components/usuarios/UserTable";
 
 type RolId = 1 | 2 | 3;
 
