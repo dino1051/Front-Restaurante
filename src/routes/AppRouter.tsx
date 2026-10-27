@@ -1,39 +1,53 @@
+import { useEffect, useState } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import LoginPage from "../pages/LoginPage";
-//import DashboardPage from "../pages/DashboardPage";
 import UsuariosPage from "../pages/UsuariosPage";
 import AdminLayout from "../components/layout/AdminLayout";
 
 export default function AppRouter() {
-  const token = localStorage.getItem("access_token");
+  const [token, setToken] = useState<string | null>(() =>
+    localStorage.getItem("access_token"),
+  );
+
+  useEffect(() => {
+    const actualizarSesion = () => {
+      setToken(localStorage.getItem("access_token"));
+    };
+
+    window.addEventListener("auth-changed", actualizarSesion);
+    window.addEventListener("storage", actualizarSesion);
+
+    return () => {
+      window.removeEventListener("auth-changed", actualizarSesion);
+      window.removeEventListener("storage", actualizarSesion);
+    };
+  }, []);
 
   return (
     <Routes>
+      {/* Inicio de sesión */}
       <Route
         path="/login"
-        element={token ? <Navigate to="/dashboard" replace /> : <LoginPage />}
+        element={token ? <Navigate to="/usuarios" replace /> : <LoginPage />}
       />
 
+      {/* Ruta principal */}
       <Route
         path="/"
-        element={
-          token ? (
-            <Navigate to="/dashboard" replace />
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
+        element={<Navigate to={token ? "/usuarios" : "/login"} replace />}
       />
 
+      {/* Rutas protegidas */}
       <Route
         element={token ? <AdminLayout /> : <Navigate to="/login" replace />}
       >
         <Route path="/usuarios" element={<UsuariosPage />} />
       </Route>
 
+      {/* Rutas inexistentes */}
       <Route
         path="*"
-        element={<Navigate to={token ? "/dashboard" : "/login"} replace />}
+        element={<Navigate to={token ? "/usuarios" : "/login"} replace />}
       />
     </Routes>
   );
